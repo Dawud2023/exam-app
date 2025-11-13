@@ -1,67 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>General Knowledge Exam</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background: #f4f7fa;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #e8f0ff, #ffffff);
     margin: 0;
     padding: 0;
-  }
-  .container {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 20px 40px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  h1 {
-    text-align: center;
     color: #333;
   }
-  .question {
-    margin-bottom: 20px;
+
+  .container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transition: 0.3s;
   }
-  .options label {
-    display: block;
-    padding: 5px 0;
-    cursor: pointer;
+
+  h1, h2 {
+    text-align: center;
+    color: #004aad;
   }
+
+  .form-section input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
   button {
-    background: #007bff;
+    background: #004aad;
     color: white;
     border: none;
     padding: 12px 20px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 16px;
+    margin: 10px 5px;
   }
+
   button:hover {
-    background: #0056b3;
+    background: #003580;
   }
+
+  .question p {
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .options label {
+    display: block;
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 6px 0;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    transition: background 0.2s;
+  }
+
+  .options label:hover {
+    background: #e0ebff;
+  }
+
   .timer {
     text-align: right;
     font-weight: bold;
     color: #d9534f;
   }
+
   .result {
     text-align: center;
     font-size: 20px;
     font-weight: bold;
+    margin-top: 20px;
+  }
+
+  .solution {
+    background: #f9f9f9;
+    border-left: 4px solid #004aad;
+    margin-top: 15px;
+    padding: 10px 15px;
+    border-radius: 6px;
+  }
+
+  .hidden {
+    display: none;
   }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>📝 30-Minute Exam</h1>
-  <div class="timer">Time Left: <span id="timer">30:00</span></div>
-  <form id="examForm"></form>
-  <button type="button" onclick="submitExam()">Submit Exam</button>
-  <div id="result" class="result"></div>
+  <h1>🧠 General Knowledge Exam</h1>
+
+  <!-- Applicant Info Form -->
+  <div id="infoSection" class="form-section">
+    <h2>Enter Applicant Details</h2>
+    <input type="text" id="fullname" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email Address" required>
+    <input type="text" id="examid" placeholder="Exam ID" required>
+    <button onclick="startExam()">Start Exam</button>
+  </div>
+
+  <!-- Exam Section -->
+  <div id="examSection" class="hidden">
+    <div class="timer">Time Left: <span id="timer">30:00</span></div>
+    <div id="questionContainer"></div>
+    <div style="text-align:center;">
+      <button id="prevBtn" onclick="prevQuestion()">Previous</button>
+      <button id="nextBtn" onclick="nextQuestion()">Next</button>
+      <button id="submitBtn" class="hidden" onclick="submitExam()">Submit Exam</button>
+    </div>
+  </div>
+
+  <!-- Result Section -->
+  <div id="resultSection" class="hidden">
+    <h2>Exam Summary</h2>
+    <div id="result" class="result"></div>
+    <div id="solutions"></div>
+  </div>
 </div>
 
 <script>
@@ -69,82 +135,119 @@ const questions = [
   {q:"Multiply 21 x 6.", options:["120","126","127","136"], answer:"126"},
   {q:"A trader bought an item for N2000 and sold it for N2700. What is the profit?", options:["N600","N700","N800"], answer:"N700"},
   {q:"The capital of Borno State is ___", options:["Kaduna","Maiduguri","Asaba","Jos"], answer:"Maiduguri"},
-  {q:"Divide 75 by 5.", options:["14","15","17","16"], answer:"15"},
-  {q:"What does the expression 'kick the bucket' mean?", options:["resign","retire","leave the office","die"], answer:"die"},
-  {q:"Multiply 25 x 8.", options:["225","210","192","200"], answer:"200"},
-  {q:"What does the expression 'spill the beans' mean?", options:["cook food","reveal a secret","waste money","tell a joke"], answer:"reveal a secret"},
-  {q:"A trader bought an item for N1500 and sold it for N2200. What is the profit?", options:["N600","N700","N800"], answer:"N700"},
-  {q:"What does the expression 'in black and white' mean?", options:["oral","uncertain","coloured","in writing"], answer:"in writing"},
-  {q:"Subtract 284 from 463.", options:["179","174","189","184"], answer:"179"},
-  {q:"The capital of Enugu State is ___", options:["Calabar","Enugu","Damaturu","Sokoto"], answer:"Enugu"},
-  {q:"What does the expression 'see eye to eye' mean?", options:["fully agree","avoid eye contact","argue constantly","dislike each other"], answer:"fully agree"},
-  {q:"Subtract 236 from 477.", options:["246","251","235","241"], answer:"241"},
-  {q:"The capital of Kwara State is ___", options:["Ilorin","Bauchi","Eket","Sokoto"], answer:"Ilorin"},
-  {q:"What does the expression 'go the extra mile' mean?", options:["travel farther","spend more money","work shorter hours","make extra effort"], answer:"make extra effort"},
-  {q:"The capital of Ondo State is ___", options:["Osogbo","Awka","Asaba","Akure"], answer:"Akure"},
-  {q:"The capital of Niger State is ___", options:["Bauchi","Kaduna","Umuahia","Minna"], answer:"Minna"},
-  {q:"What does the expression 'the ball is in your court' mean?", options:["you lost the chance","it is your turn to act","game has ended","everyone must wait"], answer:"it is your turn to act"},
-  {q:"The capital of Oyo State is ___", options:["Ibadan","Maiduguri","Jos","Gombe"], answer:"Ibadan"},
-  {q:"Add 460 and 555.", options:["1015","1020","1005","1025"], answer:"1015"},
-  {q:"What does the expression 'bite the bullet' mean?", options:["refuse to act","eat quickly","complain loudly","face a difficult situation bravely"], answer:"face a difficult situation bravely"},
-  {q:"The capital of Jigawa State is ___", options:["Lafia","Damaturu","Dutse","Calabar"], answer:"Dutse"},
-  {q:"What does the expression 'break a leg' mean?", options:["get well soon","stop now","be careful","good luck"], answer:"good luck"},
-  {q:"The capital of Nasarawa State is ___", options:["Abakaliki","Lafia","Owerri","Gusau"], answer:"Lafia"},
-  {q:"What does the expression 'bend over backwards' mean?", options:["sleep longer","refuse to help","try very hard to help","complain"], answer:"try very hard to help"},
-  {q:"What does the expression 'let the cat out of the bag' mean?", options:["buy a pet","expose a secret","return a gift","lose a bag"], answer:"expose a secret"},
-  {q:"Add 773 and 228.", options:["1000","1001","1011","1006"], answer:"1001"},
-  {q:"If one item costs N400, what is the cost of 9 items?", options:["N3675","N3550","N3600","N2700"], answer:"N3600"},
-  {q:"Subtract 272 from 537.", options:["270","260","275","265"], answer:"265"},
-  {q:"A car travels at 70 km/h for 2 hours. How far does it go?", options:["140 km","70 km","160 km","210 km"], answer:"140 km"},
-  {q:"If one item costs N700, what is the cost of 6 items?", options:["N4250","N4275","N4200","N4100"], answer:"N4200"},
-  {q:"What does the expression 'break the ice' mean?", options:["fall on ice","stop an argument","start a friendly conversation","drink cold water"], answer:"start a friendly conversation"},
-  {q:"What does the expression 'under your nose' mean?", options:["very far","very secret","very loud","very obvious"], answer:"very obvious"},
-  {q:"The capital of Akwa Ibom State is ___", options:["Maiduguri","Jos","Katsina","Uyo"], answer:"Uyo"},
-  {q:"What does the expression 'cost an arm and a leg' mean?", options:["be on discount","be very cheap","be very expensive","be free"], answer:"be very expensive"},
-  {q:"A car travels at 60 km/h for 3 hours. How far does it go?", options:["240 km","180 km","120 km","200 km"], answer:"180 km"},
-  {q:"The capital of Adamawa State is ___", options:["Abuja","Awka","Yola","Dutse"], answer:"Yola"},
-  {q:"The capital of Plateau State is ___", options:["Jos","Port Harcourt","Dutse","Ibadan"], answer:"Jos"},
-  {q:"What does the expression 'barking up the wrong tree' mean?", options:["asking politely","chasing someone","climbing a tree","accusing the wrong person"], answer:"accusing the wrong person"},
-  {q:"The capital of Lagos State is ___", options:["Sokoto","Benin City","Ikeja","Yola"], answer:"Ikeja"},
+  {q:"What does 'bite the bullet' mean?", options:["refuse to act","eat quickly","complain loudly","face a difficult situation bravely"], answer:"face a difficult situation bravely"},
+  {q:"What does 'break a leg' mean?", options:["get well soon","stop now","be careful","good luck"], answer:"good luck"}
 ];
 
-// Load questions
-const examForm = document.getElementById('examForm');
-questions.forEach((q, i) => {
-  const div = document.createElement('div');
-  div.className = 'question';
-  div.innerHTML = `<p><b>${i+1}. ${q.q}</b></p>` +
-    q.options.map(opt => `
-      <label><input type="radio" name="q${i}" value="${opt}"> ${opt}</label>
-    `).join('');
-  examForm.appendChild(div);
-});
+let currentQuestion = 0;
+let score = 0;
+let answers = {};
+let timeLeft = 30 * 60;
 
-// Timer: 30 minutes
-let timeLeft = 30 * 60; // seconds
-const timerDisplay = document.getElementById('timer');
-const timer = setInterval(() => {
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-  timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0'+seconds : seconds}`;
-  timeLeft--;
-  if (timeLeft < 0) {
-    clearInterval(timer);
-    submitExam();
+// Timer
+function startTimer() {
+  const timerDisplay = document.getElementById('timer');
+  const timer = setInterval(() => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0'+seconds : seconds}`;
+    timeLeft--;
+    if (timeLeft < 0) {
+      clearInterval(timer);
+      submitExam();
+    }
+  }, 1000);
+}
+
+// Start Exam
+function startExam() {
+  const name = document.getElementById('fullname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const examid = document.getElementById('examid').value.trim();
+
+  if (!name || !email || !examid) {
+    alert("Please fill all fields before starting the exam.");
+    return;
   }
-}, 1000);
 
+  document.getElementById('infoSection').classList.add('hidden');
+  document.getElementById('examSection').classList.remove('hidden');
+  startTimer();
+  loadQuestion();
+}
+
+// Load Question
+function loadQuestion() {
+  const q = questions[currentQuestion];
+  const container = document.getElementById('questionContainer');
+  container.innerHTML = `
+    <div class="question">
+      <p><b>Question ${currentQuestion+1} of ${questions.length}:</b> ${q.q}</p>
+      <div class="options">
+        ${q.options.map(opt => `
+          <label><input type="radio" name="q${currentQuestion}" value="${opt}" ${answers[currentQuestion] === opt ? "checked" : ""}> ${opt}</label>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'inline-block';
+  document.getElementById('nextBtn').classList.toggle('hidden', currentQuestion === questions.length - 1);
+  document.getElementById('submitBtn').classList.toggle('hidden', currentQuestion !== questions.length - 1);
+}
+
+// Save Answer
+function saveAnswer() {
+  const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+  if (selected) {
+    answers[currentQuestion] = selected.value;
+  }
+}
+
+// Navigation
+function nextQuestion() {
+  saveAnswer();
+  if (currentQuestion < questions.length - 1) {
+    currentQuestion++;
+    loadQuestion();
+  }
+}
+
+function prevQuestion() {
+  saveAnswer();
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    loadQuestion();
+  }
+}
+
+// Submit Exam
 function submitExam() {
-  clearInterval(timer);
+  saveAnswer();
+  document.getElementById('examSection').classList.add('hidden');
+  document.getElementById('resultSection').classList.remove('hidden');
+
   let score = 0;
+  let solutionsHTML = "";
+
   questions.forEach((q, i) => {
-    const selected = document.querySelector(`input[name="q${i}"]:checked`);
-    if (selected && selected.value === q.answer) score++;
+    const userAns = answers[i] || "No answer";
+    const correct = q.answer === userAns;
+    if (correct) score++;
+    solutionsHTML += `
+      <div class="solution">
+        <b>Q${i+1}:</b> ${q.q}<br>
+        <b>Your Answer:</b> ${userAns}<br>
+        <b>Correct Answer:</b> ${q.answer}<br>
+        <span style="color:${correct ? 'green':'red'};">${correct ? '✔ Correct':'✘ Incorrect'}</span>
+      </div>
+    `;
   });
+
   const percent = Math.round((score / questions.length) * 100);
-  document.getElementById('result').textContent = 
-    `You scored ${score} out of ${questions.length} (${percent}%).`;
-  window.scrollTo(0, document.body.scrollHeight);
+  document.getElementById('result').innerHTML = `
+    You scored <b>${score}</b> out of <b>${questions.length}</b> (${percent}%)
+  `;
+  document.getElementById('solutions').innerHTML = solutionsHTML;
 }
 </script>
 </body>
